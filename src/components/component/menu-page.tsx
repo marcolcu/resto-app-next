@@ -151,7 +151,27 @@ export function MenuPage() {
     return (
         <div className="relative w-full max-w-4xl mx-auto px-4 md:px-6 py-12">
             <div className="flex flex-wrap justify-center gap-4 mb-8">
-                {/* Filter buttons */}
+                <Button variant={activeFilter === "all" ? "default" : "outline"} onClick={() => setActiveFilter("all")}>
+                    All
+                </Button>
+                <Button
+                    variant={activeFilter === "appetizer" ? "default" : "outline"}
+                    onClick={() => setActiveFilter("appetizer")}
+                >
+                    Appetizers
+                </Button>
+                <Button variant={activeFilter === "main" ? "default" : "outline"}
+                        onClick={() => setActiveFilter("main")}>
+                    Main Courses
+                </Button>
+                <Button variant={activeFilter === "dessert" ? "default" : "outline"}
+                        onClick={() => setActiveFilter("dessert")}>
+                    Desserts
+                </Button>
+                <Button variant={activeFilter === "drink" ? "default" : "outline"}
+                        onClick={() => setActiveFilter("drink")}>
+                    Drinks
+                </Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {filteredMenu.map((item) => (
