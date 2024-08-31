@@ -71,7 +71,7 @@ export function LandingPage() {
                                     <div className="grid gap-1">
                                         <h3 className="text-xl font-bold">Signature Dishes</h3>
                                         <p className="text-muted-foreground">
-                                            Explore our chef's specialties, featuring locally sourced ingredients
+                                            Explore our chef&apos;s specialties, featuring locally sourced ingredients
                                             and unique flavor
                                             combinations.
                                         </p>
@@ -115,22 +115,22 @@ export function LandingPage() {
                         <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 lg:grid-cols-2 lg:gap-12">
                             <div className="flex flex-col justify-center space-y-4">
                                 <div className="grid gap-1">
-                                    <h3 className="text-xl font-bold">"The best meal I've had in years!"</h3>
+                                    <h3 className="text-xl font-bold">&quot;The best meal I've had in years!&quot;</h3>
                                     <p className="text-muted-foreground">- John Doe, Satisfied Customer</p>
                                     <p className="text-muted-foreground">
-                                        "The flavors were incredible, and the service was\n impeccable. I can't wait
-                                        to come back!"
+                                        &quot;The flavors were incredible, and the service was\n impeccable. I can't wait
+                                        to come back!&quot;
                                     </p>
                                 </div>
                             </div>
                             <div className="flex flex-col justify-center space-y-4">
                                 <div className="grid gap-1">
-                                    <h3 className="text-xl font-bold">"A truly exceptional dining experience!"</h3>
+                                    <h3 className="text-xl font-bold">&quot;A truly exceptional dining experience!&quot;</h3>
                                     <p className="text-muted-foreground">- Jane Smith, Foodie Enthusiast</p>
                                     <p className="text-muted-foreground">
-                                        "The ambiance, the food, the staff - everything was\n perfect. I can't wait
+                                        &quot;The ambiance, the food, the staff - everything was\n perfect. I can&apos;t wait
                                         to come back with my
-                                        friends!"
+                                        friends!&quot;
                                     </p>
                                 </div>
                             </div>
