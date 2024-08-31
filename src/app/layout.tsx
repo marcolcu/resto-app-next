@@ -17,11 +17,15 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <body className={inter.className}>
-                <Navbar/>
-                    {children}
-                <Footer/>
-            </body>
+        <body className={inter.className}>
+        <div className="flex flex-col min-h-screen">
+            <Navbar/>
+            <main className="flex-grow">
+                {children}
+            </main>
+            <Footer/>
+        </div>
+        </body>
         </html>
     );
 }
