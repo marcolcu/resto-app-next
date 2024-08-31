@@ -1,7 +1,7 @@
-import {TableReservationPage} from "@/components/component/table-reservation-page";
+import {ReservationPage} from "@/components/component/reservation-page";
 
 export function Reservation() {
     return (
-        <TableReservationPage />
+        <ReservationPage />
     );
 }
