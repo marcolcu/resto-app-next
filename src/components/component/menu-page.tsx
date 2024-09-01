@@ -14,6 +14,7 @@ import {
     DrawerTitle,
     DrawerTrigger
 } from "@/components/ui/drawer";
+import {usePathname} from "next/navigation";
 
 export function MenuPage() {
     const menu = [
@@ -84,20 +85,22 @@ export function MenuPage() {
     ];
 
     const {state, dispatch} = useAppContext();
+    const router = usePathname();
 
     const [activeFilter, setActiveFilter] = useState("all");
     const [reservationExists, setReservationExists] = useState(false);
     const [cartItemCount, setCartItemCount] = useState(0);
 
     useEffect(() => {
-        const reservation = state?.reservation;
-        const carts = state?.carts || [];
-
-        if (reservation) {
-            setReservationExists(true);
+        if (state) {
+            const reservation = state?.reservation;
+            const carts = state?.carts || [];
+            if (reservation) {
+                setReservationExists(true);
+            }
+            setCartItemCount(carts.reduce((acc: any, item: any) => acc + (item.qty || 0), 0));
         }
-        setCartItemCount(carts.reduce((acc: any, item: any) => acc + (item.qty || 0), 0));
-    }, [state?.reservation, state?.carts]);
+    }, [state]);
 
     const filteredMenu = useMemo(() => {
         if (activeFilter === "all") {
