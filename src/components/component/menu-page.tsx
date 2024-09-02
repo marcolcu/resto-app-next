@@ -1,9 +1,9 @@
 "use client";
 
-import {useEffect, useMemo, useState} from "react";
-import {Button} from "@/components/ui/button";
-import {Card, CardContent} from "@/components/ui/card";
-import {useAppContext} from "@/app/provider";
+import { useEffect, useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { useAppContext } from "@/app/provider";
 import {
     Drawer,
     DrawerClose,
@@ -14,7 +14,6 @@ import {
     DrawerTitle,
     DrawerTrigger
 } from "@/components/ui/drawer";
-import {usePathname} from "next/navigation";
 
 export function MenuPage() {
     const menu = [
@@ -84,21 +83,22 @@ export function MenuPage() {
         },
     ];
 
-    const {state, dispatch} = useAppContext();
-    const router = usePathname();
+    const { state, dispatch } = useAppContext();
 
     const [activeFilter, setActiveFilter] = useState("all");
     const [reservationExists, setReservationExists] = useState(false);
     const [cartItemCount, setCartItemCount] = useState(0);
 
     useEffect(() => {
-        if (state) {
+        if (state?.carts || state?.reservation) {
             const reservation = state?.reservation;
             const carts = state?.carts || [];
             if (reservation) {
                 setReservationExists(true);
             }
             setCartItemCount(carts.reduce((acc: any, item: any) => acc + (item.qty || 0), 0));
+        } else {
+            setReservationExists(false);
         }
     }, [state]);
 
@@ -122,33 +122,33 @@ export function MenuPage() {
             // Item exists, increase the qty
             updatedCarts = existingCarts.map((cartItem: any) =>
                 cartItem.id === item.id
-                    ? {...cartItem, qty: (cartItem.qty || 1) + 1}  // Increase qty if exists, otherwise set to 1
+                    ? { ...cartItem, qty: (cartItem.qty || 1) + 1 }  // Increase qty if exists, otherwise set to 1
                     : cartItem
             );
         } else {
             // Item doesn't exist, add it to the cart with qty 1
-            updatedCarts = [...existingCarts, {...item, qty: 1}];
+            updatedCarts = [...existingCarts, { ...item, qty: 1 }];
         }
 
         // Dispatch the updated carts array
-        dispatch({carts: updatedCarts});
+        dispatch({ carts: updatedCarts });
     };
 
     const handleQuantityChange = (id: number, change: number) => {
         const existingCarts = state?.carts || [];
         const updatedCarts = existingCarts.map((cartItem: any) =>
             cartItem.id === id
-                ? {...cartItem, qty: Math.max((cartItem.qty || 1) + change, 0)}
+                ? { ...cartItem, qty: Math.max((cartItem.qty || 1) + change, 0) }
                 : cartItem
         ).filter((item: any) => item.qty > 0);
 
-        dispatch({carts: updatedCarts});
+        dispatch({ carts: updatedCarts });
     };
 
     const handleRemoveItem = (id: number) => {
         const existingCarts = state?.carts || [];
         const updatedCarts = existingCarts.filter((cartItem: any) => cartItem.id !== id);
-        dispatch({carts: updatedCarts});
+        dispatch({ carts: updatedCarts });
     };
 
     return (
@@ -163,16 +163,13 @@ export function MenuPage() {
                 >
                     Appetizers
                 </Button>
-                <Button variant={activeFilter === "main" ? "default" : "outline"}
-                        onClick={() => setActiveFilter("main")}>
+                <Button variant={activeFilter === "main" ? "default" : "outline"} onClick={() => setActiveFilter("main")}>
                     Main Courses
                 </Button>
-                <Button variant={activeFilter === "dessert" ? "default" : "outline"}
-                        onClick={() => setActiveFilter("dessert")}>
+                <Button variant={activeFilter === "dessert" ? "default" : "outline"} onClick={() => setActiveFilter("dessert")}>
                     Desserts
                 </Button>
-                <Button variant={activeFilter === "drink" ? "default" : "outline"}
-                        onClick={() => setActiveFilter("drink")}>
+                <Button variant={activeFilter === "drink" ? "default" : "outline"} onClick={() => setActiveFilter("drink")}>
                     Drinks
                 </Button>
             </div>
@@ -204,12 +201,13 @@ export function MenuPage() {
                 <Drawer>
                     <DrawerTrigger asChild>
                         <Button className="fixed bottom-4 right-4 p-6 rounded-full">
-                            <ShoppingCartIcon className="w-6 h-6"/>
+                            <ShoppingCartIcon className="w-6 h-6" />
                             {cartItemCount > 0 && (
                                 <span
-                                    className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
-                              {cartItemCount}
-                            </span>
+                                    className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full"
+                                >
+                                    {cartItemCount}
+                                </span>
                             )}
                         </Button>
                     </DrawerTrigger>
@@ -219,11 +217,10 @@ export function MenuPage() {
                             <DrawerDescription>Review your order below:</DrawerDescription>
                         </DrawerHeader>
                         <div className="space-y-4 p-4">
-                            {state?.carts.map((item: any) => (
-                                <div key={item.id}
-                                     className="flex items-center justify-between border-b border-gray-200 pb-4">
+                            {(state?.carts || []).map((item: any) => (
+                                <div key={item.id} className="flex items-center justify-between border-b border-gray-200 pb-4">
                                     <div className="flex items-center">
-                                        <img src={item.image} alt={item.name} className="w-16 h-16 object-cover mr-4"/>
+                                        <img src={item.image} alt={item.name} className="w-16 h-16 object-cover mr-4" />
                                         <div>
                                             <h4 className="font-semibold">{item.name}</h4>
                                             <div className="flex items-center">
@@ -277,9 +274,9 @@ function ShoppingCartIcon(props: any) {
             strokeLinecap="round"
             strokeLinejoin="round"
         >
-            <circle cx="8" cy="21" r="1"/>
-            <circle cx="19" cy="21" r="1"/>
-            <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+            <circle cx="8" cy="21" r="1" />
+            <circle cx="19" cy="21" r="1" />
+            <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12" />
         </svg>
     );
 }
@@ -304,5 +301,5 @@ function Trash2Icon(props: any) {
             <line x1="10" x2="10" y1="11" y2="17" />
             <line x1="14" x2="14" y1="11" y2="17" />
         </svg>
-    )
+    );
 }
