@@ -1,4 +1,4 @@
-import {Admin} from "@/app/admin/dashboard/Dashboard";
+import {Admin} from "@/app/admin/AdminLayout";
 
 export default function AdminPage() {
     return (
