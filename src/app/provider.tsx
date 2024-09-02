@@ -1,8 +1,6 @@
 "use client";
 
-import { createContext, useContext, useReducer, useEffect } from "react";
-
-const AppContext = createContext<any>(null);
+import {createContext, useContext, useReducer} from "react";
 
 export const initialState = {
     carts: [],
@@ -10,27 +8,17 @@ export const initialState = {
     user: null,
     token: null,
 };
+const AppContext = createContext<any>(null);
+const reducer = (current: any, update: any) => {
+    const state = {...current, ...update};
+    localStorage.setItem("state", JSON.stringify(state));
 
-const reducer = (state: any, action: any) => {
-    const updatedState = { ...state, ...action };
-    localStorage.setItem("state", JSON.stringify(updatedState));
-    return updatedState;
+    return {...current, ...update};
 };
 
-export function Providers({ children }: { children: React.ReactNode }) {
-    // Load state from localStorage if available, otherwise use initialState
-    const [state, dispatch] = useReducer(
-        reducer,
-        JSON.parse(localStorage.getItem("state") || "{}") || initialState
-    );
-
-    // Sync state with localStorage whenever state changes
-    useEffect(() => {
-        localStorage.setItem("state", JSON.stringify(state));
-    }, [state]);
-
-    const value = { state, dispatch };
-
+export function Providers({children}: { children: React.ReactNode }) {
+    const [state, dispatch] = useReducer(reducer, initialState);
+    const value = {state, dispatch};
     return (
         <AppContext.Provider value={value}>
             {children}
