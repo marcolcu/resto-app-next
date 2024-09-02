@@ -14,6 +14,7 @@ import {
     DrawerTitle,
     DrawerTrigger
 } from "@/components/ui/drawer";
+import {useToast} from "@/hooks/use-toast";
 
 export function MenuPage() {
     const menu = [
@@ -84,6 +85,7 @@ export function MenuPage() {
     ];
 
     const { state, dispatch } = useAppContext();
+    const { toast } = useToast()
 
     const [activeFilter, setActiveFilter] = useState("all");
     const [reservationExists, setReservationExists] = useState(false);
@@ -129,6 +131,12 @@ export function MenuPage() {
             // Item doesn't exist, add it to the cart with qty 1
             updatedCarts = [...existingCarts, { ...item, qty: 1 }];
         }
+
+        // Display toast notification with the item's name
+        toast({
+            title: `${item.name} Added`,
+            description: `${item.name} has been successfully added to your cart.`,
+        });
 
         // Dispatch the updated carts array
         dispatch({ carts: updatedCarts });
