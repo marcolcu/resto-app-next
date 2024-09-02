@@ -24,6 +24,13 @@ export function ReservationPage() {
 
     const times = [];
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Calculate the end date for the next 2 weeks
+    const endDate = new Date(today);
+    endDate.setDate(today.getDate() + 13);
+
     for (let hour = 10; hour <= 22; hour++) {
         const fullHour = `${hour.toString().padStart(2, "0")}:00`;
         const halfHour = `${hour.toString().padStart(2, "0")}:30`;
@@ -37,7 +44,6 @@ export function ReservationPage() {
             return;
         }
 
-        // Prepare the reservation object
         const reservation = {
             name,
             email,
@@ -120,7 +126,9 @@ export function ReservationPage() {
                                             mode="single"
                                             selected={date}
                                             onSelect={setDate}
-                                            disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                                            disabled={(date) => date < today}
+                                            fromDate={today}
+                                            toDate={endDate}
                                             initialFocus
                                         />
                                     </PopoverContent>
