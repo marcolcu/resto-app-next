@@ -35,7 +35,7 @@ export function LoginRegisterPage() {
 
   useEffect(() => {
     if (login?.token) {
-      Cookies.set("token", login?.token, { expires: 7 });
+      Cookies.set("token", login?.token, { expires:  0.0208 });
       dispatch({
         user: login?.user,
         token: login?.token,

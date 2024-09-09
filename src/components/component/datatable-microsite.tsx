@@ -36,22 +36,27 @@ import {
 } from "@/components/ui/table";
 
 interface Service {
-    id: string;
-    name: string;
-    description: string;
+    id: number;
+    content: string;
+    image: string;
+    tipe_section: string;
+    created_at: string;
+    updated_at: string;
 }
 
 interface DataTableMicrositeProps {
     data: Service[];
-    onEdit: (id: string) => void;
-    onDelete: (id: string) => void;
+    onEdit: (id: number) => void;
+    onDelete: (id: number) => void;
+    loading: boolean;
 }
 
 export function DataTableMicrosite({
-                                      data,
-                                      onEdit,
-                                      onDelete,
-                                  }: DataTableMicrositeProps) {
+    data,
+    onEdit,
+    onDelete,
+    loading
+}: DataTableMicrositeProps) {
     const [sorting, setSorting] = useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = useState<any[]>([]);
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -83,19 +88,22 @@ export function DataTableMicrosite({
             enableHiding: false,
         },
         {
-            accessorKey: "name",
-            header: "Services",
+            accessorKey: "content",
+            header: "Content",
         },
         {
-            accessorKey: "description",
-            header: "Description",
+            accessorKey: "tipe_section",
+            header: "Type",
+            cell: ({ getValue }) => {
+                const value = getValue<string>();
+                return value.charAt(0).toUpperCase() + value.slice(1);
+            },
         },
         {
             id: "actions",
             enableHiding: false,
             cell: ({ row }) => {
                 const service = row.original;
-
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -146,9 +154,9 @@ export function DataTableMicrosite({
             <div className="flex items-center py-4">
                 <Input
                     placeholder="Filter services..."
-                    value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+                    value={(table.getColumn("content")?.getFilterValue() as string) ?? ""}
                     onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                        table.getColumn("name")?.setFilterValue(event.target.value)
+                        table.getColumn("content")?.setFilterValue(event.target.value)
                     }
                     className="max-w-sm"
                 />
@@ -197,7 +205,16 @@ export function DataTableMicrosite({
                         ))}
                     </TableHeader>
                     <TableBody>
-                        {table.getRowModel().rows?.length ? (
+                        {loading ? (
+                            <TableRow>
+                                <TableCell
+                                    colSpan={columns.length}
+                                    className="h-24 text-center"
+                                >
+                                    Loading...
+                                </TableCell>
+                            </TableRow>
+                        ) : table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
                                     key={row.id}
