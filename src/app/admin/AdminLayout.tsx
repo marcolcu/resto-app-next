@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAppContext } from "../provider";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
+import { MicrositeTabsDemo } from "./microsite/MicrositeTabs";
 
 export function Admin() {
   const router = useRouter();
@@ -128,7 +129,7 @@ export function Admin() {
               case "dashboard":
                 return <Dashboard />;
               case "microsite":
-                return <Microsite />;
+                return <MicrositeTabsDemo />;
               default:
                 return <Dashboard />;
             }
