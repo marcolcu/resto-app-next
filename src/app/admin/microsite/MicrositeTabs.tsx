@@ -25,6 +25,7 @@ import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
 import { toast, useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
+import { Customers } from "./component/Customers";
 
 export function MicrositeTabsDemo() {
   const { state, dispatch } = useAppContext(); // Get token from context
@@ -178,7 +179,6 @@ export function MicrositeTabsDemo() {
   };
 
   const handleDeleteMicrosite = async (id: number, type: string) => {
-    console.log(id);
     try {
       await postDeleteMicrosite({
         header: {
@@ -231,9 +231,8 @@ export function MicrositeTabsDemo() {
   const handleEditMicrosite = (
     id: number,
     micrositeData: any,
-    type: "hero" | "signature"
+    type: "hero" | "signature" | "customers"
   ) => {
-    console.log(micrositeData);
     if (type === "hero") {
       setDataHero({
         content: micrositeData.content,
@@ -307,8 +306,18 @@ export function MicrositeTabsDemo() {
       value: "customers",
       content: (
         <div className="w-full overflow-hidden relative h-full rounded-2xl p-10 text-xl md:text-4xl font-bold text-black border border-2 bg-white">
-          <p>Customers Say Section</p>
-          <DummyContent />
+          <div className="flex justify-between items-center">
+            <p>Customers Say Section</p>
+            <Button onClick={openSignatureDrawer}>Add Customers Say Section</Button>
+          </div>
+          <Customers
+            openDrawer={openSignatureDrawer}
+            fetchTrigger={fetch} // Pass the fetchTrigger to Signature
+            onEditMicrosite={(id, micrositeData) =>
+              handleEditMicrosite(id, micrositeData, "customers")
+            }
+            onDeleteMicrosite={(id) => handleDeleteMicrosite(id, "customers")}
+          />
         </div>
       ),
     },
