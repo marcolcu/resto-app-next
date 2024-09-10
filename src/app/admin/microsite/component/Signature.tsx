@@ -5,15 +5,13 @@ import { DataTableMicrosite } from "@/components/component/datatable-microsite";
 import { useGetAllMicrosite } from "@/services/useMicrositeService";
 import { useEffect, useState } from "react";
 
-export const Hero = ({
+export const Signature = ({
   openDrawer,
-  hasData,
   fetchTrigger,
   onEditMicrosite,
   onDeleteMicrosite,
 }: {
   openDrawer: () => void;
-  hasData: boolean;
   fetchTrigger: boolean;
   onEditMicrosite: (id: number, micrositeData: any) => void;
   onDeleteMicrosite: (id: number) => void;
@@ -27,9 +25,9 @@ export const Hero = ({
   }, [fetchTrigger, state?.token]);
 
   useEffect(() => {
-    if (state?.fetchHeader) {
+    if (state?.fetchSignature) {
         fetchData();
-        dispatch({ ...state, fetchHeader: null })
+        dispatch({ ...state, fetchSignature: null });
     }
   }, [state]);
 
@@ -40,7 +38,7 @@ export const Hero = ({
         Authorization: "Bearer " + state?.token,
       },
       queryParams: {
-        category: "header"
+        category: "signature"
       }
     }).finally(() => {
       setLoading(false);
@@ -56,17 +54,6 @@ export const Hero = ({
     }
   };
 
-  const handleDelete = (id: number) => {
-    const micrositeToEdit = microsites?.microsites.find(
-      (microsite: any) => microsite.id === id
-    );
-    console.log(id, micrositeToEdit);
-    
-    if (micrositeToEdit) {
-      onDeleteMicrosite(id);
-    }
-  };
-
   return (
     <>
       {loading ? (
@@ -76,7 +63,7 @@ export const Hero = ({
           data={microsites?.microsites}
           loading={loading}
           onEdit={handleEdit}
-          onDelete={handleDelete}
+          onDelete={onDeleteMicrosite}
         />
       )}
     </>

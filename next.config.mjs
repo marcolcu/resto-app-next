@@ -1,9 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    experimental: {
-      middleware: true,
-    },
-  };
-  
-  export default nextConfig;
-  
+  images: {
+    domains: ['www.google.com', 'chefin.com'], // Add the external domains for images
+  },
+};
+
+export default nextConfig;

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Tabs } from "@/components/ui/tabs";
 import { Hero } from "./component/Hero";
+import { Signature } from "./component/Signature";
 import {
   Drawer,
   DrawerContent,
@@ -20,139 +21,290 @@ import {
   useUpdateMicrosite,
   useDeleteMicrosite,
 } from "@/services/useMicrositeService";
+import { Textarea } from "@/components/ui/textarea";
 import Image from "next/image";
+import { toast, useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 
 export function MicrositeTabsDemo() {
   const { state, dispatch } = useAppContext(); // Get token from context
-  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // State for Hero section
+  const [drawerOpenHero, setDrawerOpenHero] = useState(false);
   const [fetch, setFetch] = useState(false);
-  const [editMicrositeId, setEditMicrositeId] = useState<number | null>(null);
-  const [data, setData] = useState({
+  const [editMicrositeIdHero, setEditMicrositeIdHero] = useState<number | null>(
+    null
+  );
+  const [dataHero, setDataHero] = useState({
     content: "",
     image: "",
-    tipe_section: "",
+    tipe_section: "header",
+    description: "",
   });
 
-  const { postMicrosite } = useCreateMicrosite();
+  const { toast } = useToast();
+
+  // State for Signature section
+  const [drawerOpenSignature, setDrawerOpenSignature] = useState(false);
+  const [showButton, setShowButton] = useState<JSX.Element | string>("");
+  const [heroHasData, setHeroHasData] = useState(false);
+  const [editMicrositeIdSignature, setEditMicrositeIdSignature] = useState<
+    number | null
+  >(null);
+  const [dataSignature, setDataSignature] = useState({
+    content: "",
+    description: "",
+    image: "",
+    tipe_section: "signature",
+    points: [
+      { title: "", description: "" },
+      { title: "", description: "" },
+      { title: "", description: "" },
+    ],
+  });
+
+  const { postMicrosite, micrositeError } = useCreateMicrosite();
   const { postUpdateMicrosite } = useUpdateMicrosite();
   const { postDeleteMicrosite } = useDeleteMicrosite();
 
-  const openDrawer = () => {
-    setDrawerOpen(true);
+  useEffect(() => {
+    if (micrositeError) {
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: micrositeError?.message,
+      });
+    }
+  }, [micrositeError]);
+
+  const handleHeroDataChange = (hasData: boolean) => {
+    setHeroHasData(hasData);
   };
 
-  const handleDataChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setData({ ...data, [e.target.name]: e.target.value });
-  };
+  const handleDataChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    type: string,
+    index?: number
+  ) => {
+    const { name, value } = e.target;
 
-  const handleEditMicrosite = (id: number, micrositeData: any) => {
-    setData({
-      content: micrositeData.content,
-      image: micrositeData.image ?? "",
-      tipe_section: micrositeData.tipe_section,
-    });
-    setEditMicrositeId(id);
-    setDrawerOpen(true);
-  };
-
-  const handleSubmitMicrosites = async () => {
-    try {
-      if (editMicrositeId === null) {
-        // Create new microsite
-        await postMicrosite({
-          header: {
-            Authorization: "Bearer " + state?.token,
-          },
-          body: {
-            content: data.content,
-            image: data.image,
-            tipe_section: data.tipe_section,
-          },
+    if (type === "signature") {
+      if (index !== undefined) {
+        // Handle changes to points array
+        setDataSignature((prevState) => {
+          const updatedPoints = [...prevState.points];
+          updatedPoints[index] = {
+            ...updatedPoints[index],
+            [name]: value,
+          };
+          return { ...prevState, points: updatedPoints };
         });
       } else {
-        // Update existing microsite
-        await postUpdateMicrosite({
-          header: {
-            Authorization: "Bearer " + state?.token,
-          },
-          body: {
-            content: data.content,
-            image: data.image,
-            tipe_section: data.tipe_section,
-          },
-          queryParams: {
-            id: editMicrositeId,
-          },
-        });
+        // Handle other fields
+        setDataSignature((prevState) => ({
+          ...prevState,
+          [name]: value,
+        }));
       }
-      // Trigger data refresh in Hero component
-      setFetch((prev) => !prev);
-      dispatch({ fetchHeader: true });
-    } catch (error) {
-      console.error("Error submitting microsite:", error);
-    } finally {
-      setDrawerOpen(false); // Close drawer regardless of success or error
+    } else if (type === "hero") {
+      // Handle Hero data change
+      setDataHero((prevState) => ({
+        ...prevState,
+        [name]: value,
+      }));
     }
   };
 
-  const handleDeleteMicrosite = async (id: number) => {
+  // Common function to handle data submission
+  const handleSubmitMicrosites = async (type: string) => {
+    try {
+      let body;
+
+      // Buat body request berdasarkan tipe microsite
+      if (type === "hero") {
+        body = {
+          content: dataHero.content,
+          image: dataHero.image,
+          tipe_section: dataHero.tipe_section,
+          description: dataHero.description,
+        };
+      } else if (type === "signature") {
+        body = {
+          content: dataSignature.content,
+          description: dataSignature.description,
+          tipe_section: dataSignature.tipe_section,
+          points: dataSignature.points,
+        };
+      } else {
+        throw new Error("Unknown type");
+      }
+
+      // Cek apakah ID untuk edit ada, jika ada maka update, jika tidak maka create baru
+      if (
+        (type === "hero" && editMicrositeIdHero !== null) ||
+        (type === "signature" && editMicrositeIdSignature !== null)
+      ) {
+        const editId =
+          type === "hero" ? editMicrositeIdHero : editMicrositeIdSignature;
+
+        // Update existing microsite
+        await postUpdateMicrosite({
+          header: { Authorization: "Bearer " + state?.token },
+          body,
+          queryParams: { id: editId },
+        });
+      } else {
+        // Create new microsite
+        await postMicrosite({
+          header: { Authorization: "Bearer " + state?.token },
+          body,
+        });
+      }
+
+      // Trigger fetch data setelah submit
+      setFetch((prev) => !prev);
+    } catch (error) {
+      console.error("Error submitting microsite:", error);
+    } finally {
+      // Tutup drawer dan refresh state berdasarkan tipe
+      if (type === "hero") {
+        dispatch({ fetchHeader: true });
+        setDrawerOpenHero(false);
+      } else if (type === "signature") {
+        dispatch({ fetchSignature: true });
+        setDrawerOpenSignature(false);
+      }
+    }
+  };
+
+  const handleDeleteMicrosite = async (id: number, type: string) => {
+    console.log(id);
     try {
       await postDeleteMicrosite({
         header: {
-          Authorization: "Bearer " + state?.token,
+          Authorization: `Bearer ${state?.token}`,
         },
         queryParams: {
           id,
         },
       });
-      // Trigger data refresh in Hero component
+
+      // Trigger data refresh based on type
       setFetch((prev) => !prev);
-      dispatch({ fetchHeader: true });
+      if (type === "signature") {
+        dispatch({ fetchSignature: true });
+      } else if (type === "hero") {
+        dispatch({ fetchHeader: true });
+      }
     } catch (error) {
       console.error("Error deleting microsite:", error);
+    }
+  };
+
+  const openHeroDrawer = () => {
+    setDrawerOpenHero(true);
+    setEditMicrositeIdHero(null); // Reset edit state
+    setDataHero({
+      content: "",
+      image: "",
+      tipe_section: "header",
+      description: "",
+    });
+  };
+
+  const openSignatureDrawer = () => {
+    setDrawerOpenSignature(true);
+    setEditMicrositeIdSignature(null); // Reset edit state
+    setDataSignature({
+      content: "",
+      description: "",
+      tipe_section: "signature",
+      image: "",
+      points: [
+        { title: "", description: "" },
+        { title: "", description: "" },
+        { title: "", description: "" },
+      ],
+    });
+  };
+
+  const handleEditMicrosite = (
+    id: number,
+    micrositeData: any,
+    type: "hero" | "signature"
+  ) => {
+    console.log(micrositeData);
+    if (type === "hero") {
+      setDataHero({
+        content: micrositeData.content,
+        image: micrositeData.image ?? "",
+        tipe_section: micrositeData.tipe_section,
+        description: micrositeData.description,
+      });
+      setEditMicrositeIdHero(id);
+      setDrawerOpenHero(true);
+    } else if (type === "signature") {
+      setDataSignature({
+        content: micrositeData.content,
+        description: micrositeData.description,
+        tipe_section: micrositeData.tipe_section,
+        image: micrositeData.image,
+        points: micrositeData.points || [
+          { title: "", description: "" },
+          { title: "", description: "" },
+          { title: "", description: "" },
+        ],
+      });
+      setEditMicrositeIdSignature(id);
+      setDrawerOpenSignature(true);
     }
   };
 
   const tabs = [
     {
       title: "Hero Section",
-      value: "product",
+      value: "hero",
       content: (
         <div className="w-full overflow-hidden relative h-full rounded-2xl p-10 text-xl md:text-4xl font-bold text-black border border-2 bg-white">
           <div className="flex justify-between items-center">
             <p>Hero Section</p>
-            <Button
-              onClick={() => {
-                setDrawerOpen(true);
-                setEditMicrositeId(null); // Reset edit state
-                setData({ content: "", image: "", tipe_section: "" });
-              }}
-            >
-              Add Hero Section
-            </Button>
+            <Button onClick={openHeroDrawer}>Add Hero Section</Button>
           </div>
           <Hero
-            openDrawer={openDrawer}
-            fetchTrigger={fetch} // Pass the fetchTrigger to Hero
-            onEditMicrosite={handleEditMicrosite}
-            onDeleteMicrosite={handleDeleteMicrosite}
+            openDrawer={openHeroDrawer}
+            fetchTrigger={fetch}
+            hasData={heroHasData}
+            onEditMicrosite={(id, micrositeData) =>
+              handleEditMicrosite(id, micrositeData, "hero")
+            }
+            onDeleteMicrosite={(id) => handleDeleteMicrosite(id, "hero")}
           />
         </div>
       ),
     },
     {
       title: "Signature Section",
-      value: "services",
+      value: "signature",
       content: (
         <div className="w-full overflow-hidden relative h-full rounded-2xl p-10 text-xl md:text-4xl font-bold text-black border border-2 bg-white">
-          <p>Signature Section</p>
-          <DummyContent />
+          <div className="flex justify-between items-center">
+            <p>Signature Section</p>
+            <Button onClick={openSignatureDrawer}>Add Signature Section</Button>
+          </div>
+          <Signature
+            openDrawer={openSignatureDrawer}
+            fetchTrigger={fetch} // Pass the fetchTrigger to Signature
+            onEditMicrosite={(id, micrositeData) =>
+              handleEditMicrosite(id, micrositeData, "signature")
+            }
+            onDeleteMicrosite={(id) => handleDeleteMicrosite(id, "signature")}
+          />
         </div>
       ),
     },
     {
       title: "Customers Say Section",
-      value: "playground",
+      value: "customers",
       content: (
         <div className="w-full overflow-hidden relative h-full rounded-2xl p-10 text-xl md:text-4xl font-bold text-black border border-2 bg-white">
           <p>Customers Say Section</p>
@@ -161,21 +313,11 @@ export function MicrositeTabsDemo() {
       ),
     },
     {
-      title: "About",
-      value: "content",
+      title: "About Us Section",
+      value: "about",
       content: (
         <div className="w-full overflow-hidden relative h-full rounded-2xl p-10 text-xl md:text-4xl font-bold text-black border border-2 bg-white">
-          <p>About</p>
-          <DummyContent />
-        </div>
-      ),
-    },
-    {
-      title: "Contact",
-      value: "random",
-      content: (
-        <div className="w-full overflow-hidden relative h-full rounded-2xl p-10 text-xl md:text-4xl font-bold text-black border border-2 bg-white">
-          <p>Contact</p>
+          <p>About Us Section</p>
           <DummyContent />
         </div>
       ),
@@ -188,18 +330,18 @@ export function MicrositeTabsDemo() {
         <Tabs tabs={tabs} />
       </div>
 
-      {/* Drawer */}
-      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+      {/* Hero Drawer */}
+      <Drawer open={drawerOpenHero} onOpenChange={setDrawerOpenHero}>
         <DrawerContent>
           <div className="mx-auto w-full max-w-sm">
             <DrawerHeader>
               <DrawerTitle>
-                {editMicrositeId ? "Edit Microsite" : "Add Microsite"}
+                {editMicrositeIdHero ? "Edit Hero Section" : "Add Hero Section"}
               </DrawerTitle>
               <DrawerDescription>
-                {editMicrositeId
-                  ? "Edit the microsite details."
-                  : "Insert your microsites in here."}
+                {editMicrositeIdHero
+                  ? "Edit the hero section details."
+                  : "Insert your hero section in here."}
               </DrawerDescription>
             </DrawerHeader>
             <div className="p-4 pb-0">
@@ -209,33 +351,139 @@ export function MicrositeTabsDemo() {
                   name="content"
                   id="content"
                   placeholder="Content"
-                  value={data.content}
-                  onChange={handleDataChange}
+                  value={dataHero.content}
+                  onChange={(e) => handleDataChange(e, "hero")}
                 />
                 <Input
                   type="text"
                   name="image"
                   id="image"
-                  placeholder="Link Image"
-                  value={data.image}
-                  onChange={handleDataChange}
+                  placeholder="Image Link (Optional)"
+                  value={dataHero.image}
+                  onChange={(e) => handleDataChange(e, "hero")}
                 />
                 <Input
                   type="text"
                   placeholder="Type your description here."
                   name="tipe_section"
                   id="tipe_section"
-                  value={data.tipe_section}
-                  onChange={handleDataChange}
+                  value={dataHero.tipe_section}
+                  onChange={(e) => handleDataChange(e, "hero")}
+                  disabled
+                />
+                <Textarea
+                  name="description"
+                  id="description"
+                  placeholder="Enter detailed description here."
+                  value={dataHero.description}
+                  onChange={(e) => handleDataChange(e, "hero")}
                 />
               </div>
             </div>
             <DrawerFooter>
-              <Button onClick={handleSubmitMicrosites}>
-                {editMicrositeId ? "Save Changes" : "Submit"}
+              <Button onClick={() => handleSubmitMicrosites("hero")}>
+                {editMicrositeIdHero ? "Save Changes" : "Submit"}
               </Button>
               <DrawerClose asChild>
-                <Button variant="outline" onClick={() => setDrawerOpen(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setDrawerOpenHero(false)}
+                >
+                  Cancel
+                </Button>
+              </DrawerClose>
+            </DrawerFooter>
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Signature Drawer */}
+      <Drawer open={drawerOpenSignature} onOpenChange={setDrawerOpenSignature}>
+        <DrawerContent>
+          <div className="mx-auto w-full max-w-lg">
+            <DrawerHeader>
+              <DrawerTitle>
+                {editMicrositeIdSignature
+                  ? "Edit Signature Section"
+                  : "Add Signature Section"}
+              </DrawerTitle>
+              <DrawerDescription>
+                {editMicrositeIdSignature
+                  ? "Edit the signature section details."
+                  : "Insert your signature section in here."}
+              </DrawerDescription>
+            </DrawerHeader>
+            <div className="p-4 pb-0 flex flex-col md:flex-row gap-4">
+              <div className="flex-1 flex flex-col gap-3">
+                <p className="text-sm text-muted-foreground invisible">Point</p>
+                <Input
+                  type="text"
+                  name="content"
+                  id="contnet"
+                  placeholder="Content"
+                  value={dataSignature.content}
+                  onChange={(e) => handleDataChange(e, "signature")}
+                />
+                <Input
+                  type="text"
+                  name="image"
+                  id="image"
+                  placeholder="Image Link (Optional)"
+                  value={dataSignature.image}
+                  onChange={(e) => handleDataChange(e, "signature")}
+                />
+                <Textarea
+                  name="description"
+                  id="description"
+                  placeholder="Enter detailed description here."
+                  value={dataSignature.description}
+                  onChange={(e) => handleDataChange(e, "signature")}
+                  rows={14}
+                />
+                <Input
+                  type="text"
+                  placeholder="Type your section type here."
+                  name="tipe_section"
+                  id="tipe_section"
+                  value={dataSignature.tipe_section}
+                  onChange={(e) => handleDataChange(e, "signature")}
+                  disabled
+                />
+              </div>
+              <div className="flex-1 flex flex-col gap-3">
+                {dataSignature.points.map((point, index) => (
+                  <div key={index} className="mb-4 flex flex-col gap-3">
+                    <p className="text-sm text-muted-foreground">
+                      Point {index + 1}
+                    </p>
+                    <Input
+                      type="text"
+                      name="title"
+                      id={`title_${index}`}
+                      placeholder="Additional Field"
+                      value={point.title}
+                      onChange={(e) => handleDataChange(e, "signature", index)}
+                    />
+                    <Textarea
+                      name="description"
+                      id={`description_${index}`}
+                      placeholder="Additional description here."
+                      value={point.description}
+                      onChange={(e) => handleDataChange(e, "signature", index)}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DrawerFooter>
+              <Button onClick={() => handleSubmitMicrosites("signature")}>
+                {editMicrositeIdSignature ? "Save Changes" : "Submit"}
+              </Button>
+              <DrawerClose asChild>
+                <Button
+                  variant="outline"
+                  onClick={() => setDrawerOpenSignature(false)}
+                >
                   Cancel
                 </Button>
               </DrawerClose>
@@ -247,14 +495,6 @@ export function MicrositeTabsDemo() {
   );
 }
 
-const DummyContent = () => {
-  return (
-    <Image
-      src="/linear.webp"
-      alt="dummy image"
-      width="1000"
-      height="1000"
-      className="object-cover object-left-top h-[60%] md:h-[90%] absolute -bottom-10 inset-x-0 w-[90%] rounded-xl mx-auto"
-    />
-  );
-};
+function DummyContent() {
+  return <div>Placeholder content here</div>;
+}
