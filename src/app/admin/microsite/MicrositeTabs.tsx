@@ -1,37 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Tabs } from "@/components/ui/tabs";
-import { Hero } from "./component/Hero";
-import { Signature } from "./component/Signature";
+import {useEffect, useState} from "react";
+import {Tabs} from "@/components/ui/tabs";
+import {Hero} from "./component/Hero";
+import {Signature} from "./component/Signature";
 import {
   Drawer,
+  DrawerClose,
   DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
   DrawerDescription,
   DrawerFooter,
-  DrawerClose,
+  DrawerHeader,
+  DrawerTitle,
 } from "@/components/ui/drawer";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useAppContext } from "@/app/provider";
-import {
-  useCreateMicrosite,
-  useUpdateMicrosite,
-  useDeleteMicrosite,
-} from "@/services/useMicrositeService";
-import { Textarea } from "@/components/ui/textarea";
-import Image from "next/image";
-import { toast, useToast } from "@/hooks/use-toast";
-import { ToastAction } from "@/components/ui/toast";
-import { Customers } from "./component/Customers";
+import {Input} from "@/components/ui/input";
+import {Button} from "@/components/ui/button";
+import {useAppContext} from "@/app/provider";
+import {useCreateMicrosite, useDeleteMicrosite, useUpdateMicrosite,} from "@/services/useMicrositeService";
+import {Textarea} from "@/components/ui/textarea";
+import {useToast} from "@/hooks/use-toast";
+import {Customers} from "./component/Customers";
 
 export function MicrositeTabsDemo() {
   const { state, dispatch } = useAppContext(); // Get token from context
 
   // State for Hero section
   const [drawerOpenHero, setDrawerOpenHero] = useState(false);
+  const [drawerOpenCustomer, setDrawerOpenCustomer] = useState(false);
   const [fetch, setFetch] = useState(false);
   const [editMicrositeIdHero, setEditMicrositeIdHero] = useState<number | null>(
     null
@@ -47,10 +42,12 @@ export function MicrositeTabsDemo() {
 
   // State for Signature section
   const [drawerOpenSignature, setDrawerOpenSignature] = useState(false);
-  const [showButton, setShowButton] = useState<JSX.Element | string>("");
   const [heroHasData, setHeroHasData] = useState(false);
   const [editMicrositeIdSignature, setEditMicrositeIdSignature] = useState<
     number | null
+  >(null);
+  const [editMicrositeIdCustomer, setEditMicrositeIdCustomer] = useState<
+      number | null
   >(null);
   const [dataSignature, setDataSignature] = useState({
     content: "",
@@ -62,6 +59,12 @@ export function MicrositeTabsDemo() {
       { title: "", description: "" },
       { title: "", description: "" },
     ],
+  });
+  const [dataCustomer, setDataCustomer] = useState({
+    content: "",
+    image: "",
+    tipe_section: "customer",
+    description: "",
   });
 
   const { postMicrosite, micrositeError } = useCreateMicrosite();
@@ -113,6 +116,11 @@ export function MicrositeTabsDemo() {
         ...prevState,
         [name]: value,
       }));
+    } else if (type === "customer") {
+      setDataCustomer((prevState) => ({
+        ...prevState,
+        [name]: value,
+      }));
     }
   };
 
@@ -136,6 +144,13 @@ export function MicrositeTabsDemo() {
           tipe_section: dataSignature.tipe_section,
           points: dataSignature.points,
         };
+      } else if (type === "customer") {
+        body = {
+          content: dataCustomer.content,
+          image: dataCustomer.image,
+          tipe_section: dataCustomer.tipe_section,
+          description: dataCustomer.description,
+        }
       } else {
         throw new Error("Unknown type");
       }
@@ -143,10 +158,15 @@ export function MicrositeTabsDemo() {
       // Cek apakah ID untuk edit ada, jika ada maka update, jika tidak maka create baru
       if (
         (type === "hero" && editMicrositeIdHero !== null) ||
-        (type === "signature" && editMicrositeIdSignature !== null)
+          (type === "signature" && editMicrositeIdSignature !== null) ||
+          (type === "customer" && editMicrositeIdCustomer !== null)
       ) {
         const editId =
-          type === "hero" ? editMicrositeIdHero : editMicrositeIdSignature;
+            type === "hero"
+                ? editMicrositeIdHero
+                : type === "signature"
+                    ? editMicrositeIdSignature
+                    : editMicrositeIdCustomer;
 
         // Update existing microsite
         await postUpdateMicrosite({
@@ -174,6 +194,9 @@ export function MicrositeTabsDemo() {
       } else if (type === "signature") {
         dispatch({ fetchSignature: true });
         setDrawerOpenSignature(false);
+      } else if (type === "customer") {
+        dispatch({ fetchCustomer: true });
+        setDrawerOpenCustomer(false);
       }
     }
   };
@@ -195,6 +218,8 @@ export function MicrositeTabsDemo() {
         dispatch({ fetchSignature: true });
       } else if (type === "hero") {
         dispatch({ fetchHeader: true });
+      } else if (type === "customer") {
+        dispatch({ fetchCustomer: true });
       }
     } catch (error) {
       console.error("Error deleting microsite:", error);
@@ -228,10 +253,21 @@ export function MicrositeTabsDemo() {
     });
   };
 
+  const openCustomerDrawer = () => {
+    setDrawerOpenCustomer(true);
+    setEditMicrositeIdCustomer(null); // Reset edit state
+    setDataCustomer({
+      content: "",
+      image: "",
+      tipe_section: "customer",
+      description: "",
+    });
+  };
+
   const handleEditMicrosite = (
     id: number,
     micrositeData: any,
-    type: "hero" | "signature" | "customers"
+    type: "hero" | "signature" | "customer"
   ) => {
     if (type === "hero") {
       setDataHero({
@@ -256,6 +292,15 @@ export function MicrositeTabsDemo() {
       });
       setEditMicrositeIdSignature(id);
       setDrawerOpenSignature(true);
+    } else if (type === "customer") {
+      setDataCustomer({
+        content: micrositeData.content,
+        image: micrositeData.image ?? "",
+        tipe_section: micrositeData.tipe_section,
+        description: micrositeData.description,
+      });
+      setEditMicrositeIdCustomer(id);
+      setDrawerOpenCustomer(true);
     }
   };
 
@@ -308,26 +353,16 @@ export function MicrositeTabsDemo() {
         <div className="w-full overflow-hidden relative h-full rounded-2xl p-10 text-xl md:text-4xl font-bold text-black border border-2 bg-white">
           <div className="flex justify-between items-center">
             <p>Customers Say Section</p>
-            <Button onClick={openSignatureDrawer}>Add Customers Say Section</Button>
+            <Button onClick={openCustomerDrawer}>Add Customers Say Section</Button>
           </div>
           <Customers
-            openDrawer={openSignatureDrawer}
+            openDrawer={openCustomerDrawer}
             fetchTrigger={fetch} // Pass the fetchTrigger to Signature
             onEditMicrosite={(id, micrositeData) =>
-              handleEditMicrosite(id, micrositeData, "customers")
+              handleEditMicrosite(id, micrositeData, "customer")
             }
-            onDeleteMicrosite={(id) => handleDeleteMicrosite(id, "customers")}
+            onDeleteMicrosite={(id) => handleDeleteMicrosite(id, "customer")}
           />
-        </div>
-      ),
-    },
-    {
-      title: "About Us Section",
-      value: "about",
-      content: (
-        <div className="w-full overflow-hidden relative h-full rounded-2xl p-10 text-xl md:text-4xl font-bold text-black border border-2 bg-white">
-          <p>About Us Section</p>
-          <DummyContent />
         </div>
       ),
     },
@@ -500,10 +535,77 @@ export function MicrositeTabsDemo() {
           </div>
         </DrawerContent>
       </Drawer>
+
+      {/* Customer Drawer */}
+      <Drawer open={drawerOpenCustomer} onOpenChange={setDrawerOpenCustomer}>
+        <DrawerContent>
+          <div className="mx-auto w-full max-w-sm">
+            <DrawerHeader>
+              <DrawerTitle>
+                {editMicrositeIdCustomer ? "Edit Hero Section" : "Add Hero Section"}
+              </DrawerTitle>
+              <DrawerDescription>
+                {editMicrositeIdCustomer
+                    ? "Edit the hero section details."
+                    : "Insert your hero section in here."}
+              </DrawerDescription>
+            </DrawerHeader>
+            <div className="p-4 pb-0">
+              <div className="flex flex-col gap-3 items-center justify-center">
+                <Input
+                    type="text"
+                    name="content"
+                    id="content"
+                    placeholder="Content"
+                    value={dataCustomer.content}
+                    onChange={(e) => handleDataChange(e, "customer")}
+                />
+                <Input
+                    type="text"
+                    name="image"
+                    id="image"
+                    placeholder="Image Link (Optional)"
+                    value={dataCustomer.image}
+                    onChange={(e) => handleDataChange(e, "customer")}
+                />
+                <Input
+                    type="text"
+                    placeholder="Type your description here."
+                    name="tipe_section"
+                    id="tipe_section"
+                    value={dataCustomer.tipe_section}
+                    onChange={(e) => handleDataChange(e, "customer")}
+                    disabled
+                />
+                <Textarea
+                    name="description"
+                    id="description"
+                    placeholder="Enter detailed description here."
+                    value={dataCustomer.description}
+                    onChange={(e) => handleDataChange(e, "customer")}
+                />
+              </div>
+            </div>
+            <DrawerFooter>
+              <Button onClick={() => handleSubmitMicrosites("customer")}>
+                {editMicrositeIdCustomer ? "Save Changes" : "Submit"}
+              </Button>
+              <DrawerClose asChild>
+                <Button
+                    variant="outline"
+                    onClick={() => setDrawerOpenHero(false)}
+                >
+                  Cancel
+                </Button>
+              </DrawerClose>
+            </DrawerFooter>
+          </div>
+        </DrawerContent>
+      </Drawer>
     </>
   );
 }
 
-function DummyContent() {
-  return <div>Placeholder content here</div>;
-}
+// function DummyContent() {
+//   return <div>Placeholder content here</div>;
+// }

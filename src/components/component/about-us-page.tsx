@@ -81,44 +81,6 @@ export function AboutUsPage() {
                         </div>
                     </div>
                 </section>
-
-                {/* Section Testimonials */}
-                <section className="w-full py-12 md:py-24 lg:py-32">
-                    <div className="container flex flex-col items-center justify-center gap-4 px-4 text-center md:px-6 lg:gap-10">
-                        <div className="space-y-3">
-                            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Testimonials</h2>
-                            <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed dark:text-gray-400">
-                                Our customers love us. Here&apos;s what they&apos;re saying about our company.
-                            </p>
-                        </div>
-                        <div className="grid w-full grid-cols-1 items-stretch justify-center md:grid-cols-2 md:gap-4">
-                            {/* Testimonial 1 */}
-                            <div className="flex flex-col gap-2 p-4 border rounded-lg border-gray-200 bg-gray-50 shadow-sm max-w-sm mx-auto md:p-8 md:gap-4 md:max-w-none dark:border-gray-800 dark:bg-gray-950">
-                                <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    &ldquo;The platform is incredibly user-friendly. We were able to onboard our team with minimal
-                                    training, and the collaboration features have really improved our productivity. I highly recommend
-                                    it!&rdquo;
-                                </p>
-                                <div className="flex flex-col items-center space-y-1">
-                                    <div className="font-bold">Samantha Willis</div>
-                                    <div className="text-xs text-gray-500 dark:text-gray-400">(Marketing Manager)</div>
-                                </div>
-                            </div>
-                            {/* Testimonial 2 */}
-                            <div className="flex flex-col gap-2 p-4 border rounded-lg border-gray-200 bg-gray-50 shadow-sm max-w-sm mx-auto md:p-8 md:gap-4 md:max-w-none dark:border-gray-800 dark:bg-gray-950">
-                                <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    &ldquo;The support team is fantastic. Whenever we&apos;ve had an issue or a question, they&apos;ve
-                                    been incredibly responsive. It&apos;s clear that they care about their customers. That&apos;s made a
-                                    huge difference for us.&rdquo;
-                                </p>
-                                <div className="flex flex-col items-center space-y-1">
-                                    <div className="font-bold">Alex Chen</div>
-                                    <div className="text-xs text-gray-500 dark:text-gray-400">(CTO)</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
             </main>
         </div>
     )

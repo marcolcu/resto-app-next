@@ -1,7 +1,7 @@
 "use client";
 
 import React, {useEffect, useState} from "react";
-import {IconArrowLeft, IconBrandTabler, IconServer, IconToolsKitchen2,} from "@tabler/icons-react";
+import {IconArrowLeft, IconBrandTabler, IconInfoCircle, IconServer, IconToolsKitchen2,} from "@tabler/icons-react";
 import {cn} from "@/lib/utils";
 import {Sidebar, SidebarBody, SidebarLink} from "@/components/ui/sidebar";
 import {Dashboard} from "@/app/admin/dashboard/Dashboard";
@@ -11,6 +11,7 @@ import {useAppContext} from "../provider";
 import {useRouter} from "next/navigation";
 import {MicrositeTabsDemo} from "./microsite/MicrositeTabs";
 import {Menu} from "./menu/Menu";
+import {About} from "@/app/admin/about/About";
 
 export function Admin() {
   const router = useRouter();
@@ -54,6 +55,13 @@ export function Admin() {
           <IconServer className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0"/>
       ),
       page: "microsite",
+    },
+    {
+      label: "About",
+      icon: (
+          <IconInfoCircle className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0"/>
+      ),
+      page: "about",
     },
     {
       label: "Menu",
@@ -136,6 +144,8 @@ export function Admin() {
                   return <MicrositeTabsDemo/>;
                 case "menu":
                   return <Menu />;
+                case "about":
+                  return <About />;
                 default:
                   return <Dashboard/>;
               }

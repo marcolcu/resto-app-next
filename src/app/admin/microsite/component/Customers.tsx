@@ -25,9 +25,9 @@ export const Customers = ({
   }, [fetchTrigger, state?.token]);
 
   useEffect(() => {
-    if (state?.fetchSignature) {
+    if (state?.fetchCustomer) {
         fetchData();
-        dispatch({ ...state, fetchSignature: null });
+        dispatch({ ...state, fetchCustomer: null });
     }
   }, [state]);
 
@@ -38,7 +38,7 @@ export const Customers = ({
         Authorization: "Bearer " + state?.token,
       },
       queryParams: {
-        category: "signature"
+        category: "customer"
       }
     }).finally(() => {
       setLoading(false);
