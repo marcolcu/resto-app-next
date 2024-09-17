@@ -139,7 +139,7 @@ export function LandingPage() {
                                 {/* Assuming customerSection contains testimonials */}
                                 <div className="flex flex-col justify-center space-y-4">
                                     <div className="grid gap-1">
-                                        <h3 className="text-xl font-bold">"{customerSection.content}"</h3>
+                                        <h3 className="text-xl font-bold">&quot;{customerSection.content}&quot;</h3>
                                         <p className="text-muted-foreground">- Customer Review</p>
                                         <p className="text-muted-foreground">
                                             {customerSection.description}

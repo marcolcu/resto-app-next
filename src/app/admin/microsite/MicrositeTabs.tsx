@@ -141,6 +141,7 @@ export function MicrositeTabsDemo() {
         body = {
           content: dataSignature.content,
           description: dataSignature.description,
+          image: dataSignature.image,
           tipe_section: dataSignature.tipe_section,
           points: dataSignature.points,
         };
