@@ -86,7 +86,7 @@ export function Navbar() {
                 </Link>
             )}
             <nav className="ml-auto flex gap-4 sm:gap-6">
-                {isClient && (state?.carts || state?.reservation) ? (
+                {isClient && (state?.carts?.length > 0 || state?.reservation) ? (
                     <Button
                         onClick={handleCancelReservation}
                         className="text-sm font-medium hover:underline underline-offset-4"
@@ -101,8 +101,8 @@ export function Navbar() {
                         <Link href="/about" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
                             About
                         </Link>
-                        <Link href="#" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
-                            Contact
+                        <Link href="/menu" className="text-sm font-medium hover:underline underline-offset-4" prefetch={false}>
+                            Menus
                         </Link>
                     </>
                 )}

@@ -19,6 +19,7 @@ import { useGetMenu } from "@/services/useMenuService";
 import Image from "next/image";
 import { useCreateReservations } from "@/services/useReservationService";
 import { useRouter } from "next/navigation";
+import {Skeleton} from "@/components/ui/skeleton";
 
 export interface MenuItem {
   id: number;
@@ -201,7 +202,33 @@ export function MenuPage() {
   };
 
   if (!getMenu || !isClient) {
-    return null;
+    return (
+        <div className="relative w-full max-w-4xl mx-auto px-4 md:px-6 py-12">
+          {/* Filter Buttons Skeleton */}
+          <div className="flex flex-wrap justify-center gap-4 mb-8">
+            <Skeleton className="h-10 w-24 rounded" />
+            <Skeleton className="h-10 w-24 rounded" />
+            <Skeleton className="h-10 w-24 rounded" />
+          </div>
+
+          {/* Menu Items Skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {[1, 2, 3, 4].map((_, index) => (
+                <Card key={index}>
+                  <Skeleton className="w-full aspect-[3/2] rounded-t-lg" />
+                  <CardContent className="grid gap-4 pt-5">
+                    <div className="flex justify-between items-center">
+                      <Skeleton className="h-6 w-24 rounded" />
+                      <Skeleton className="h-6 w-16 rounded" />
+                    </div>
+                    <Skeleton className="h-4 w-64 rounded" />
+                    <Skeleton className="h-10 w-32 rounded" />
+                  </CardContent>
+                </Card>
+            ))}
+          </div>
+        </div>
+    );
   }
 
   return (

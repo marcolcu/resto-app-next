@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useGetAllMicrosite } from "@/services/useMicrositeService";
 import { useEffect, useState } from "react";
 import { useAppContext } from "@/app/provider";
+import {Skeleton} from "@/components/ui/skeleton";
 
 type Point = {
     title: string;
@@ -37,7 +38,67 @@ export function LandingPage() {
     }, [state, isClient]);
 
     if (!microsites || !isClient) {
-        return null; // Menunggu data atau window
+        return (
+            <main className="flex-1">
+                {/* Header Section Skeleton */}
+                <section className="w-full py-12 md:py-24 lg:py-32">
+                    <div className="container px-4 md:px-6 mx-auto">
+                        <div className="flex flex-col items-center justify-center text-center space-y-6 lg:grid lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
+                            <div className="flex flex-col justify-center space-y-4">
+                                <div className="space-y-2 lg:text-left">
+                                    <Skeleton className="h-10 w-3/4 sm:w-full lg:w-3/4 xl:w-2/3" />
+                                    <Skeleton className="h-6 w-full sm:w-full lg:w-4/5" />
+                                </div>
+                                <div className="flex flex-col gap-2 min-[400px]:flex-row justify-center lg:justify-start">
+                                    <Skeleton className="h-10 w-32" />
+                                    <Skeleton className="h-10 w-32" />
+                                </div>
+                            </div>
+                            <Skeleton className="mx-auto aspect-video rounded-xl sm:w-full lg:aspect-[3/1] lg:order-last" />
+                        </div>
+                    </div>
+                </section>
+
+                {/* Signature Section Skeleton */}
+                <section className="w-full py-12 md:py-24 lg:py-32 bg-muted">
+                    <div className="container px-4 md:px-6 mx-auto">
+                        <div className="flex flex-col items-center justify-center space-y-4 text-center">
+                            <Skeleton className="h-8 w-2/3 sm:w-1/2 lg:w-1/3" />
+                            <Skeleton className="h-6 w-full sm:w-4/5 lg:w-3/5" />
+                        </div>
+                        <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 lg:grid-cols-2 lg:gap-12">
+                            <Skeleton className="mx-auto aspect-video rounded-xl sm:w-full lg:order-last" />
+                            <div className="flex flex-col justify-center space-y-4">
+                                <ul className="grid gap-6">
+                                    {[...Array(3)].map((_, index) => (
+                                        <li key={index}>
+                                            <Skeleton className="h-6 w-3/4 mb-4" />
+                                            <Skeleton className="h-4 w-full sm:w-4/5" />
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Customer Section Skeleton */}
+                <section className="w-full py-12 md:py-24 lg:py-32">
+                    <div className="container px-4 md:px-6 mx-auto">
+                        <div className="flex flex-col items-center justify-center space-y-4 text-center">
+                            <Skeleton className="h-8 w-2/3 sm:w-1/2 lg:w-1/3" />
+                            <Skeleton className="h-6 w-full sm:w-4/5 lg:w-3/5" />
+                        </div>
+                        <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 lg:grid-cols-2 lg:gap-12">
+                            <div className="flex flex-col justify-center space-y-4">
+                                <Skeleton className="h-6 w-3/4" />
+                                <Skeleton className="h-4 w-full sm:w-4/5" />
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        );
     }
 
     // Filter microsites based on type with explicit type
