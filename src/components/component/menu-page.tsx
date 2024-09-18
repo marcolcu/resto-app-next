@@ -127,7 +127,7 @@ export function MenuPage() {
         });
         router.prefetch("/");
         router.push("/");
-      }, 8000);
+      }, 7500);
     } else if (reservationsError) {
       setClick(false);
       toast({
