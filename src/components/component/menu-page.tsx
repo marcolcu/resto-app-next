@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { useAppContext } from "@/app/provider";
+import {useEffect, useMemo, useState} from "react";
+import {Button} from "@/components/ui/button";
+import {Card, CardContent} from "@/components/ui/card";
+import {useAppContext} from "@/app/provider";
 import {
   Drawer,
   DrawerClose,
@@ -14,12 +14,13 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { useToast } from "@/hooks/use-toast";
-import { useGetMenu } from "@/services/useMenuService";
+import {useToast} from "@/hooks/use-toast";
+import {useGetMenu} from "@/services/useMenuService";
 import Image from "next/image";
-import { useCreateReservations } from "@/services/useReservationService";
-import { useRouter } from "next/navigation";
+import {useCreateReservations} from "@/services/useReservationService";
+import {useRouter} from "next/navigation";
 import {Skeleton} from "@/components/ui/skeleton";
+import {MultiStepLoader as Loader} from "@/components/ui/multi-step-loader";
 
 export interface MenuItem {
   id: number;
@@ -39,6 +40,21 @@ export interface ApiResponse {
   message: string;
 }
 
+const loadingStates = [
+  {
+    text: "Checking table availability",
+  },
+  {
+    text: "Verifying menu stock",
+  },
+  {
+    text: "Processing your booking",
+  },
+  {
+    text: "Booking successful",
+  },
+];
+
 export function MenuPage() {
   const { state, dispatch } = useAppContext();
   const { toast } = useToast();
@@ -48,6 +64,8 @@ export function MenuPage() {
   const { postReservations, reservations, reservationsError } =
     useCreateReservations();
 
+  const [loading, setLoading] = useState(false);
+  const [click, setClick] = useState(false);
   const [activeFilter, setActiveFilter] = useState("all");
   const [reservationExists, setReservationExists] = useState(false);
   const [cartItemCount, setCartItemCount] = useState(0);
@@ -96,22 +114,26 @@ export function MenuPage() {
 
   useEffect(() => {
     if (reservations) {
-      toast({
-        title: reservations?.message,
-      });
+      setClick(false);
+      setLoading(true);
       dispatch({
         ...state,
         carts: [],
         reservation: null
       });
-      router.prefetch("/");
-      router.push("/");
+      setTimeout(() => {
+        toast({
+          title: reservations?.message,
+        });
+        router.prefetch("/");
+        router.push("/");
+      }, 8000);
     } else if (reservationsError) {
+      setClick(false);
       toast({
         variant: "destructive",
         title: "Error",
-        description:
-          reservationsError?.message,
+        description: reservationsError?.message,
       });
     }
   }, [reservations, reservationsError])
@@ -175,6 +197,8 @@ export function MenuPage() {
   const handleSubmitOrder = () => {
     const { reservation, carts } = state || {};
 
+    setClick(true);
+
     if (!reservation || carts.length === 0) {
       toast({
         title: "No Reservation or Cart",
@@ -231,132 +255,143 @@ export function MenuPage() {
     );
   }
 
-  return (
-    <div className="relative w-full max-w-4xl mx-auto px-4 md:px-6 py-12">
-      <div className="flex flex-wrap justify-center gap-4 mb-8">
-        <Button
-          variant={activeFilter === "all" ? "default" : "outline"}
-          onClick={() => setActiveFilter("all")}
-        >
-          All
-        </Button>
-        {categories.map((category) => (
-          <Button
-            key={category}
-            variant={activeFilter === category ? "default" : "outline"}
-            onClick={() => setActiveFilter(category)}
-          >
-            {category.charAt(0).toUpperCase() + category.slice(1)}
-          </Button>
-        ))}
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {filteredMenu.map((item) => (
-          <Card key={item.id}>
-            <Image
-              src={item.image}
-              alt={item.name}
-              width={600}
-              height={400}
-              className="rounded-t-lg object-cover w-full aspect-[3/2]"
-            />
-            <CardContent className="grid gap-4 pt-5">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">{item.name}</h3>
-                <div className="text-primary font-semibold">
-                  {new Intl.NumberFormat("id-ID", {
-                    style: "currency",
-                    currency: "IDR",
-                  })
-                    .format(item.price)
-                    .replace(",00", "")}
-                </div>
-              </div>
-              <p className="text-muted-foreground">{item.description}</p>
-              {reservationExists && (
-                <Button onClick={() => handleOrderClick(item)}>Order</Button>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+  if (loading) {
+    return (
+        <div className="w-full h-[60vh] flex items-center justify-center">
+          <Loader loadingStates={loadingStates} loading={loading} duration={2000}/>
+        </div>
+    );
+  }
 
-      {reservationExists && cartItemCount > 0 && (
-        <Drawer>
-          <DrawerTrigger asChild>
-            <Button className="fixed bottom-4 right-4 p-6 rounded-full">
-              <ShoppingCartIcon className="w-6 h-6" />
-              {cartItemCount > 0 && (
-                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
-                  {cartItemCount}
-                </span>
-              )}
-            </Button>
-          </DrawerTrigger>
-          <DrawerContent>
-            <DrawerHeader>
-              <DrawerTitle>Your Cart</DrawerTitle>
-              <DrawerDescription>Review your order below:</DrawerDescription>
-            </DrawerHeader>
-            <div className="space-y-4 p-4">
-              {(state?.carts || []).map((item: any) => (
-                <div
-                  key={item.id}
-                  className="flex items-center justify-between border-b border-gray-200 pb-4"
-                >
-                  <div className="flex items-center">
-                    <Image
-                      src={item.image}
-                      alt={item.name}
-                      width={200}
-                      height={200}
-                      className="w-16 h-16 object-cover mr-4"
-                    />
-                    <div>
-                      <h4 className="font-semibold">{item.name}</h4>
-                      <div className="flex items-center">
-                        <Button
-                          size="sm"
-                          onClick={() => handleQuantityChange(item.id, -1)}
-                          disabled={item.qty <= 1}
-                        >
-                          -
-                        </Button>
-                        <span className="mx-2">{item.qty}</span>
-                        <Button
-                          size="sm"
-                          onClick={() => handleQuantityChange(item.id, 1)}
-                        >
-                          +
-                        </Button>
-                      </div>
+  return (
+      <div className="relative w-full max-w-4xl mx-auto px-4 md:px-6 py-12">
+        <div className="flex flex-wrap justify-center gap-4 mb-8">
+          <Button
+              variant={activeFilter === "all" ? "default" : "outline"}
+              onClick={() => setActiveFilter("all")}
+          >
+            All
+          </Button>
+          {categories.map((category) => (
+              <Button
+                  key={category}
+                  variant={activeFilter === category ? "default" : "outline"}
+                  onClick={() => setActiveFilter(category)}
+              >
+                {category.charAt(0).toUpperCase() + category.slice(1)}
+              </Button>
+          ))}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {filteredMenu.map((item) => (
+              <Card key={item.id}>
+                <Image
+                    src={item.image}
+                    alt={item.name}
+                    width={600}
+                    height={400}
+                    className="rounded-t-lg object-cover w-full aspect-[3/2]"
+                />
+                <CardContent className="grid gap-4 pt-5">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">{item.name}</h3>
+                    <div className="text-primary font-semibold">
+                      {new Intl.NumberFormat("id-ID", {
+                        style: "currency",
+                        currency: "IDR",
+                      })
+                          .format(item.price)
+                          .replace(",00", "")}
                     </div>
                   </div>
-                  <Button
-                    onClick={() => handleRemoveItem(item.id)}
-                    variant="destructive"
-                  >
-                    <Trash2Icon />
-                  </Button>
+                  <p className="text-muted-foreground">{item.description}</p>
+                  {reservationExists && (
+                      <Button onClick={() => handleOrderClick(item)}>Order</Button>
+                  )}
+                </CardContent>
+              </Card>
+          ))}
+        </div>
+
+        {reservationExists && cartItemCount > 0 && (
+            <Drawer>
+              <DrawerTrigger asChild>
+                <Button className="fixed bottom-4 right-4 p-6 rounded-full">
+                  <ShoppingCartIcon className="w-6 h-6"/>
+                  {cartItemCount > 0 && (
+                      <span
+                          className="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
+                  {cartItemCount}
+                </span>
+                  )}
+                </Button>
+              </DrawerTrigger>
+              <DrawerContent>
+                <DrawerHeader>
+                  <DrawerTitle>Your Cart</DrawerTitle>
+                  <DrawerDescription>Review your order below:</DrawerDescription>
+                </DrawerHeader>
+                <div className="space-y-4 p-4">
+                  {(state?.carts || []).map((item: any) => (
+                      <div
+                          key={item.id}
+                          className="flex items-center justify-between border-b border-gray-200 pb-4"
+                      >
+                        <div className="flex items-center">
+                          <Image
+                              src={item.image}
+                              alt={item.name}
+                              width={200}
+                              height={200}
+                              className="w-16 h-16 object-cover mr-4"
+                          />
+                          <div>
+                            <h4 className="font-semibold">{item.name}</h4>
+                            <div className="flex items-center">
+                              <Button
+                                  size="sm"
+                                  onClick={() => handleQuantityChange(item.id, -1)}
+                                  disabled={item.qty <= 1}
+                              >
+                                -
+                              </Button>
+                              <span className="mx-2">{item.qty}</span>
+                              <Button
+                                  size="sm"
+                                  onClick={() => handleQuantityChange(item.id, 1)}
+                              >
+                                +
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                        <Button
+                            onClick={() => handleRemoveItem(item.id)}
+                            variant="destructive"
+                        >
+                          <Trash2Icon/>
+                        </Button>
+                      </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-            <DrawerFooter>
-              <Button onClick={handleSubmitOrder}>Submit Order</Button>
-              <DrawerClose asChild>
-                <Button variant="outline">Close</Button>
-              </DrawerClose>
-            </DrawerFooter>
-          </DrawerContent>
-        </Drawer>
-      )}
-    </div>
+                <DrawerFooter>
+                  <Button onClick={handleSubmitOrder}>
+                    {click ? "Submitting..." : "Submit Order"}
+                  </Button>
+                  <DrawerClose asChild>
+                    <Button variant="outline">Close</Button>
+                  </DrawerClose>
+                </DrawerFooter>
+              </DrawerContent>
+            </Drawer>
+        )}
+      </div>
   );
 }
 
 function ShoppingCartIcon(props: any) {
   return (
-    <svg
+      <svg
       {...props}
       xmlns="http://www.w3.org/2000/svg"
       width="24"
