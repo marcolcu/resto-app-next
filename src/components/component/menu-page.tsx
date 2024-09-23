@@ -91,6 +91,7 @@ export function MenuPage() {
         (item: MenuItem) => item.category
       );
       const uniqueCategories: string[] = Array.from(new Set(categories));
+      uniqueCategories.sort((a, b) => a.localeCompare(b));
 
       setCategories(uniqueCategories);
       setMenus(getMenu.menus);
