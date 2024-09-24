@@ -347,26 +347,26 @@ export function MicrositeTabsDemo() {
         </div>
       ),
     },
-    {
-      title: "Customers Say Section",
-      value: "customers",
-      content: (
-        <div className="w-full overflow-hidden relative h-full rounded-2xl p-10 text-xl md:text-4xl font-bold text-black border border-2 bg-white">
-          <div className="flex justify-between items-center">
-            <p>Customers Say Section</p>
-            <Button onClick={openCustomerDrawer}>Add Customers Say Section</Button>
-          </div>
-          <Customers
-            openDrawer={openCustomerDrawer}
-            fetchTrigger={fetch} // Pass the fetchTrigger to Signature
-            onEditMicrosite={(id, micrositeData) =>
-              handleEditMicrosite(id, micrositeData, "customer")
-            }
-            onDeleteMicrosite={(id) => handleDeleteMicrosite(id, "customer")}
-          />
-        </div>
-      ),
-    },
+    // {
+    //   title: "Customers Say Section",
+    //   value: "customers",
+    //   content: (
+    //     <div className="w-full overflow-hidden relative h-full rounded-2xl p-10 text-xl md:text-4xl font-bold text-black border border-2 bg-white">
+    //       <div className="flex justify-between items-center">
+    //         <p>Customers Say Section</p>
+    //         <Button onClick={openCustomerDrawer}>Add Customers Say Section</Button>
+    //       </div>
+    //       <Customers
+    //         openDrawer={openCustomerDrawer}
+    //         fetchTrigger={fetch} // Pass the fetchTrigger to Signature
+    //         onEditMicrosite={(id, micrositeData) =>
+    //           handleEditMicrosite(id, micrositeData, "customer")
+    //         }
+    //         onDeleteMicrosite={(id) => handleDeleteMicrosite(id, "customer")}
+    //       />
+    //     </div>
+    //   ),
+    // },
   ];
 
   return (

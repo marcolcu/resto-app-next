@@ -36,23 +36,28 @@ import {
 } from "@/components/ui/table";
 import Image from "next/image";
 import {Badge} from "@/components/ui/badge";
+import { AnimatedTooltip } from "../ui/animated-tooltip";
+interface Chef {
+  chef_name: string;   // Name of the chef
+  chef_position: string; // Position of the chef
+  chef_image_url: string; // Image URL of the chef
+  about_id: number;    // Associated About ID
+  created_at: string;  // Date created
+  updated_at: string;  // Date updated
+}
 
-interface Service {
-  id: number;
-  name: string;        // Menu name
-  description: string; // Description of the menu
-  price: number;       // Price of the menu item
-  category: string;    // Category of the menu item
-  image: string;       // Image URL
-  stock: number;       // Stock count
-  disable: boolean;    // Disable flag (true = disabled, false = active)
+interface About {
+  id: number;          // About ID
+  description: string; // Description of the About section
+  tipe_section: string; // Type of section (e.g., "chef")
+  chefs: Chef[];      // Array of chefs
   created_at: string;  // Date created
   updated_at: string;  // Date updated
 }
 
 
 interface DataTableMicrositeProps {
-  data: Service[];
+  data: About[];
   onEdit: (id: number) => void;
   onDelete: (id: number) => void;
   loading: boolean;
@@ -69,10 +74,10 @@ export function DataTableAbout({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
-  const columns: ColumnDef<Service>[] = [
+  const columns: ColumnDef<About>[] = [
     {
       id: "select",
-      header: ({ table }: { table: TanstackTable<Service> }) => (
+      header: ({ table }: { table: TanstackTable<About> }) => (
           <Checkbox
               checked={
                   table.getIsAllPageRowsSelected() ||
@@ -95,31 +100,35 @@ export function DataTableAbout({
     {
       accessorKey: "tipe_section",
       header: "Type",
-    },
-    {
-      accessorKey: "image",
-      header: "Image Link",
       cell: ({ row }) => {
-        const imageSrc = row.original.image;
-
-        // Check if the image source is empty
-        if (!imageSrc) {
-          return <div>No Photo</div>;
-        }
-
+        const typeValue = row.original.tipe_section;
+    
         return (
-            <Image
-                src={imageSrc}
-                alt="Image"
-                width={100}
-                height={100}
-            />
+          <div className="capitalize">
+            {typeValue}
+          </div>
         );
       },
     },
     {
       accessorKey: "description",
       header: "Description",
+    },
+    {
+      id: "image",
+      cell: ({ row }) => {
+        const chefSrc = row.original.chefs;
+
+        if (!Array.isArray(chefSrc) || chefSrc.length === 0) {
+          return null;
+        }
+
+        return (
+          <div className="flex h-[10rem]">
+            <AnimatedTooltip items={chefSrc} />
+          </div>
+        );
+      },
     },
     {
       id: "actions",
