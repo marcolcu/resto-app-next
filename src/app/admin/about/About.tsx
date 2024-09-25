@@ -41,6 +41,7 @@ export const About = () => {
   const { toast } = useToast();
   const { state } = useAppContext();
   const [loading, setLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
   const [data, setData] = useState({
     description: "",
     tipe_section: "",
@@ -64,8 +65,16 @@ export const About = () => {
   const { fetchAbout, getAbout } = useGetAbout();
 
   useEffect(() => {
-    fetchData();
-  }, [state?.token]);
+    if (typeof window !== "undefined") {
+      setIsClient(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isClient) {
+      fetchData();
+    }
+  }, [isClient]);
 
   useEffect(() => {
     if (getAbout?.abouts) {

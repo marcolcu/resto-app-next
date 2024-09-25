@@ -18,16 +18,25 @@ export const Signature = ({
 }) => {
   const { state, dispatch } = useAppContext();
   const [loading, setLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
   const { fetchMicrosites, microsites } = useGetAllMicrosite();
 
   useEffect(() => {
-    fetchData();
-  }, [fetchTrigger, state?.token]);
+    if (typeof window !== "undefined") {
+      setIsClient(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isClient) {
+      fetchData();
+    }
+  }, [isClient]);
 
   useEffect(() => {
     if (state?.fetchSignature) {
-        fetchData();
-        dispatch({ ...state, fetchSignature: null });
+      fetchData();
+      dispatch({ ...state, fetchSignature: null });
     }
   }, [state]);
 
@@ -38,8 +47,8 @@ export const Signature = ({
         Authorization: "Bearer " + state?.token,
       },
       queryParams: {
-        category: "signature"
-      }
+        category: "signature",
+      },
     }).finally(() => {
       setLoading(false);
     });

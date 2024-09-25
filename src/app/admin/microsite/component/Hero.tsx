@@ -20,16 +20,25 @@ export const Hero = ({
 }) => {
   const { state, dispatch } = useAppContext();
   const [loading, setLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
   const { fetchMicrosites, microsites } = useGetAllMicrosite();
 
   useEffect(() => {
-    fetchData();
-  }, [fetchTrigger, state?.token]);
+    if (typeof window !== "undefined") {
+      setIsClient(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isClient) {
+      fetchData();
+    }
+  }, [isClient]);
 
   useEffect(() => {
     if (state?.fetchHeader) {
-        fetchData();
-        dispatch({ ...state, fetchHeader: null })
+      fetchData();
+      dispatch({ ...state, fetchHeader: null });
     }
   }, [state]);
 
@@ -40,8 +49,8 @@ export const Hero = ({
         Authorization: "Bearer " + state?.token,
       },
       queryParams: {
-        category: "header"
-      }
+        category: "header",
+      },
     }).finally(() => {
       setLoading(false);
     });
@@ -60,8 +69,7 @@ export const Hero = ({
     const micrositeToEdit = microsites?.microsites.find(
       (microsite: any) => microsite.id === id
     );
-    console.log(id, micrositeToEdit);
-    
+
     if (micrositeToEdit) {
       onDeleteMicrosite(id);
     }

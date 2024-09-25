@@ -31,6 +31,7 @@ export const Reservations = () => {
 
   const { state } = useAppContext();
   const [loading, setLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteMenuId, setDeleteMenuId] = useState<number | null>(null);
 
@@ -38,8 +39,16 @@ export const Reservations = () => {
   const { postDeleteReservations, deleteReservations } = useDeleteReservations();
 
   useEffect(() => {
-    fetchData();
-  }, [state?.token]);
+    if (typeof window !== "undefined") {
+      setIsClient(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isClient) {
+      fetchData();
+    }
+  }, [isClient]);
 
   useEffect(() => {
     if (getReservations?.reservations) {
