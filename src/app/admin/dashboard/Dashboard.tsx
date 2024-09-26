@@ -146,7 +146,6 @@ export const Dashboard = () => {
                   <TableHead>Order ID</TableHead>
                   <TableHead>Customer</TableHead>
                   <TableHead>Date</TableHead>
-                  <TableHead>Total</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
@@ -186,7 +185,6 @@ export const Dashboard = () => {
                               reservation.reserve_time
                             ).toLocaleString()}
                           </TableCell>
-                          <TableCell>${total.toFixed(2)}</TableCell>
                           <TableCell>
                             <Badge variant="secondary">Upcoming</Badge>
                           </TableCell>
